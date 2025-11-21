@@ -1,0 +1,70 @@
+name: Manual JMeter Performance Test
+
+# 1. Configuración del disparador (Trigger)
+on:
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Tipo de prueba (etiqueta para el reporte)'
+        required: true
+        default: 'SmokeTest'
+        type: choice
+        options:
+        - SmokeTest
+        - LoadTest
+      threads:
+        description: 'Número de Usuarios (Threads)'
+        required: true
+        default: '1'
+      rampup:
+        description: 'Ramp-up (segundos)'
+        required: true
+        default: '1'
+      duration:
+        description: 'Duración (segundos)'
+        required: true
+        default: '10'
+
+jobs:
+  performance-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install JMeter
+        run: |
+          wget https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.6.3.tgz
+          tar -xzf apache-jmeter-5.6.3.tgz
+          # Verificación rápida de versión
+          ./apache-jmeter-5.6.3/bin/jmeter --version
+
+      - name: Run JMeter Test
+        run: |
+          # Crear carpeta de resultados
+          mkdir -p results/report
+          
+          # Ejecutar JMeter apuntando al binario descargado
+          ./apache-jmeter-5.6.3/bin/jmeter -n -t scripts/reqres_api_test.jmx \
+            -l results/test_results.jtl \
+            -e -o results/report \
+            -Jthreads=${{ inputs.threads }} \
+            -Jrampup=${{ inputs.rampup }} \
+            -Jduration=${{ inputs.duration }} \
+            -Jloops=-1
+          
+          echo "Test finalizado exitosamente."
+
+      - name: Upload Test Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jmeter-report-${{ inputs.test_type }}
+          path: results/report/
+          retention-days: 5

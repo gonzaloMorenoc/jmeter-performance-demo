@@ -1,23 +1,20 @@
 #!/bin/bash
+# Stress Test: Busca el punto de quiebre (Carga alta).
 
-# Definir variables
-JMETER_HOME="/ruta/a/tu/jmeter/bin/jmeter"
+JMETER_BIN="jmeter"
 SCRIPT="../scripts/reqres_api_test.jmx"
-LOG_FILE="../results/load_test_log.jtl"
-REPORT_FOLDER="../results/load_test_report"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+LOG_FILE="../results/stress_${TIMESTAMP}.jtl"
+REPORT_FOLDER="../results/report_stress_${TIMESTAMP}"
 
-# Limpiar ejecuciones anteriores
-rm -f $LOG_FILE
-rm -rf $REPORT_FOLDER
+echo "--- Iniciando STRESS TEST (¡Cuidado con el API!) ---"
 
-echo "Iniciando Prueba de Carga..."
-
-# Ejecutar JMeter pasando parámetros dinámicos (-J)
-$JMETER_HOME -n -t $SCRIPT \
+$JMETER_BIN -n -t $SCRIPT \
     -l $LOG_FILE \
     -e -o $REPORT_FOLDER \
-    -Jthreads=100 \
-    -Jrampup=30 \
-    -Jduration=600
+    -Jthreads=80 \
+    -Jrampup=60 \
+    -Jduration=600 \
+    -Jloops=-1
 
-echo "Prueba finalizada. Reporte generado en $REPORT_FOLDER"
+echo "--- Stress Test finalizado. Reporte en: $REPORT_FOLDER ---"

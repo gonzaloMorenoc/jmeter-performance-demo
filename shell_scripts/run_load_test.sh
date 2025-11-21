@@ -1,23 +1,20 @@
 #!/bin/bash
+# Load Test: Carga media sostenida.
 
-# Definir variables
-JMETER_HOME="/ruta/a/tu/jmeter/bin/jmeter"
+JMETER_BIN="jmeter"
 SCRIPT="../scripts/reqres_api_test.jmx"
-LOG_FILE="../results/load_test_log.jtl"
-REPORT_FOLDER="../results/load_test_report"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+LOG_FILE="../results/load_${TIMESTAMP}.jtl"
+REPORT_FOLDER="../results/report_load_${TIMESTAMP}"
 
-# Limpiar ejecuciones anteriores
-rm -f $LOG_FILE
-rm -rf $REPORT_FOLDER
+echo "--- Iniciando LOAD TEST (Carga Media) ---"
 
-echo "Iniciando Prueba de Carga..."
-
-# Ejecutar JMeter pasando parámetros dinámicos (-J)
-$JMETER_HOME -n -t $SCRIPT \
+$JMETER_BIN -n -t $SCRIPT \
     -l $LOG_FILE \
     -e -o $REPORT_FOLDER \
     -Jthreads=20 \
-    -Jrampup=60 \
-    -Jduration=300
+    -Jrampup=30 \
+    -Jduration=300 \
+    -Jloops=-1
 
-echo "Prueba finalizada. Reporte generado en $REPORT_FOLDER"
+echo "--- Load Test finalizado. Reporte en: $REPORT_FOLDER ---"
